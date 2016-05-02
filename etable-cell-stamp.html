@@ -1,0 +1,59 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<dom-module id="etable-cell-stamp">
+  <template>
+    <style>
+      :host {
+        display: inline-block;
+      }
+    </style>
+    <div id="stamp"></div>
+  </template>
+  <script>
+    (function() {
+      'use strict'
+
+      Polymer({
+        is: 'etable-cell-stamp',
+        behaviors: [
+          Polymer.Templatizer
+        ],
+        _instanceProps: {
+          value: true
+        },
+        properties: {
+          data: {
+            type: Object,
+            notify: true,
+            observer: '_dataChange'
+          },
+          template: {
+            type: Object
+          },
+          output: {
+            type: Object,
+            notify: true
+          }
+        },
+        _forwardInstanceProp: function(inst, prop, value) {
+          this.set('output', value)
+        },
+        _dataChange(data) {
+          if (this.clone) this.clone.value = data;
+        },
+        refresh() {
+          this.clone.value = this.data;
+        },
+        ready() {
+          this.templatize(this.template);
+          this.clone = this.stamp({
+            value: this.data
+          });
+          this.output = this.data;
+          Polymer.dom(this.$.stamp).appendChild(this.clone.root);
+        }
+      });
+
+    })()
+  </script>
+</dom-module>

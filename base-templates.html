@@ -1,0 +1,27 @@
+<etable-cell-register name="base">
+  <template id="display">
+    {{value}}
+  </template>
+  <template id="editor">
+    <paper-input label="Input label" value="{{value}}"></paper-input>
+  </template>
+</etable-cell-register>
+
+
+<etable-cell-register name="advanced">
+  <template id="display">
+    <span style="background: #CCC;">{{value}}</span>
+  </template>
+  <template id="editor">
+    <paper-input label="Input label" value="{{value}}"></paper-input>
+  </template>
+</etable-cell-register>
+
+<etable-cell-register name="BLOCKED">
+  <template id="display">
+    NOPE!
+  </template>
+  <template id="editor">
+    <paper-input label="Input label" value="{{value}}"></paper-input>
+  </template>
+</etable-cell-register>

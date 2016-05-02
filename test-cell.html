@@ -1,0 +1,22 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<dom-module id="test-cell">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    TEST: [[value]]
+  </template>
+  <script>
+    Polymer({
+      is: 'test-cell',
+      properties: {
+        value: {
+          type: String
+        }
+      }
+    });
+  </script>
+</dom-module>

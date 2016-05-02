@@ -1,0 +1,42 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-meta/iron-meta.html">
+
+<dom-module id="etable-cell-register">
+  <template>
+  </template>
+  <script>
+    Polymer({
+      is: 'etable-cell-register',
+      properties: {
+        name: {
+          type: String,
+          observer: '_nameChanged'
+        }
+      },
+      attached() {
+        this.style.display = 'none';
+      },
+      getTemplate() {
+        this.template = this.template || this._createTemplate();
+        return this.template;
+      },
+      _nameChanged() {
+        new Polymer.IronMeta({
+          type: 'iris-cell-stamps',
+          key: this.name,
+          value: this
+        });
+      },
+      _createTemplate() {
+        var result = {};
+
+        Polymer.dom(this).querySelectorAll('template')
+          .forEach((template) => {
+            result[template.id] = template;
+          });
+
+        return result;
+      }
+    })
+  </script>
+</dom-module>

@@ -1,0 +1,90 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+
+<link rel="import" href="etable-cell-stamp.html">
+
+<dom-module id="etable-cell">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <span id="stamp"></span>
+
+    <span id="controls">
+        <paper-icon-button icon="create" on-click="toggleEditor"></paper-icon-button>
+    </span>
+  </template>
+  <script>
+    (function() {
+      'use strict'
+
+      let _meta = Polymer.Base.create('iron-meta', {
+        type: 'iris-cell-stamps'
+      });
+
+      let getTemplate = function(name) {
+        let model = _meta.byKey(name);
+        let template = model.getTemplate();
+        return template;
+      };
+
+      Polymer({
+        is: 'etable-cell',
+        behaviors: [
+          Polymer.Templatizer
+        ],
+        properties: {
+          isEditing: {
+            type: Boolean,
+            value: false
+          },
+          data: {
+            type: Object
+          },
+          field: {
+            type: Object,
+            notify: true
+          },
+          model: {
+            type: Object
+          }
+        },
+        observers: ['_presentationChanged(data)'],
+
+        commitChanges(e) {
+          if (_.isUndefined(this.output)) return;
+          this.set('field.data', this.output);
+          console.log(this.field);
+          console.log('field data cahnged', this.output);
+          this.toggleEditor();
+        },
+        cancelChanges() {
+          this.toggleEditor();
+        },
+        cancelChanges() {
+          this.toggleEditor();
+        },
+        toggleEditor() {
+          this.set('isEditorMode', !this.isEditorMode);
+
+          //@TODO: fire event or something like it here
+        },
+        _presentationChanged() {
+          // let template_name = this.model[this.field.name] ? this.model[this.field.name].template : 'base';
+          let template_name = 'base';
+
+          let template = getTemplate(template_name);
+          this.templatize(template.display);
+          this.clone = this.stamp({
+            value: this.data
+          });
+          this.output = this.data;
+          Polymer.dom(this.$.stamp).appendChild(this.clone.root);
+        }
+      });
+
+    })();
+  </script>
+</dom-module>

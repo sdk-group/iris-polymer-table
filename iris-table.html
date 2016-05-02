@@ -1,0 +1,68 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<link rel="import" href="etable-cell.html">
+<link rel="import" href="etable-cell-register.html">
+<link rel="import" href="base-templates.html">
+
+<dom-module id="iris-table">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      #entity-table td {
+        white-space: nowrap;
+      }
+    </style>
+    <table id="entity-table">
+      <template id="table" is="dom-repeat" items="[[data]]" on-dom-change="dch">
+        <tr>
+          <template id="row" is="dom-repeat" items="[[toArray(item)]]" as="celldata">
+            <td>
+              <etable-cell data="[[celldata]]" model="[[fieldsModel]]"></etable-cell>
+            </td>
+          </template>
+        </tr>
+      </template>
+    </table>
+
+  </template>
+  <script>
+    'use strict'
+
+    Polymer({
+      is: 'iris-table',
+      properties: {
+        fieldsModel: {
+          type: Object
+        },
+        data: Object
+      },
+      dch() {
+        console.log('dome change');
+      },
+      toArray(item) {
+        return _.values(item);
+      },
+      ready() {
+        this.counter = 0;
+        this.fieldsModel = {
+          field1: {
+            label: 'Поле АДЫН',
+            template: 'base'
+          },
+          field2: {
+            label: 'Поле ДВА',
+            template: 'advanced'
+          },
+          field3: {
+            label: 'Поле три',
+            template: 'BLOCKED'
+          }
+        };
+
+      }
+    });
+  </script>
+</dom-module>
