@@ -15,12 +15,31 @@
         white-space: nowrap;
       }
     </style>
+    <array-selector id="selector" items="{{data}}" selected="{{selected}}" multi toggle></array-selector>
+
     <table id="entity-table">
-      <template id="table" is="dom-repeat" items="[[data]]" on-dom-change="dch">
+      <tr>
+        <template is="dom-if" if="[[multiselect]]">
+          <th>
+            <paper-checkbox id="select-all"></paper-checkbox>
+          </th>
+        </template>
+        <template id="row" is="dom-repeat" items="[[fieldsModel]]" as="model">
+          <th>
+            [[model.label]]
+          </th>
+        </template>
+      </tr>
+      <template id="table" is="dom-repeat" items="[[data]]" as="row">
         <tr>
-          <template id="row" is="dom-repeat" items="[[toArray(item)]]" as="celldata">
+          <template is="dom-if" if="[[multiselect]]">
             <td>
-              <etable-cell data="[[celldata]]" model="[[fieldsModel]]"></etable-cell>
+              <paper-checkbox on-change="toggleSelection"></paper-checkbox>
+            </td>
+          </template>
+          <template id="row" is="dom-repeat" items="[[fieldsModel]]" as="model">
+            <td>
+              <etable-cell is-editable="[[isEditable]]" data="[[getCelldata(model,row)]]" model="[[field]]"></etable-cell>
             </td>
           </template>
         </tr>
@@ -37,31 +56,30 @@
         fieldsModel: {
           type: Object
         },
+        multiselect: {
+          type: Boolean,
+          value: false
+        },
+        isEditable: {
+          type: Boolean,
+          value: false
+        },
+        selected: {
+          type: Array,
+          notify: true
+        },
         data: Object
       },
-      dch() {
-        console.log('dome change');
+      getCelldata(model, row) {
+        return model.field ? row[model.field] : undefined
       },
-      toArray(item) {
-        return _.values(item);
+      toggleSelection(e) {
+        var item = this.$.table.itemForElement(e.target);
+        this.$.selector.select(item);
+        console.log(this.selected);
       },
       ready() {
         this.counter = 0;
-        this.fieldsModel = {
-          field1: {
-            label: 'Поле АДЫН',
-            template: 'base'
-          },
-          field2: {
-            label: 'Поле ДВА',
-            template: 'advanced'
-          },
-          field3: {
-            label: 'Поле три',
-            template: 'BLOCKED'
-          }
-        };
-
       }
     });
   </script>

@@ -12,9 +12,11 @@
     </style>
     <span id="stamp"></span>
 
-    <span id="controls">
+    <template is="dom-if" if="[[isEditable]]">
+      <span id="controls">
         <paper-icon-button icon="create" on-click="toggleEditor"></paper-icon-button>
-    </span>
+      </span>
+    </template>
   </template>
   <script>
     (function() {
@@ -88,3 +90,4 @@
     })();
   </script>
 </dom-module>
+odule>
