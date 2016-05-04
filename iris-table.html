@@ -21,7 +21,7 @@
       <tr>
         <template is="dom-if" if="[[multiselect]]">
           <th>
-            <paper-checkbox id="select-all"></paper-checkbox>
+            <paper-checkbox id="select-all" on-change="pickAll"></paper-checkbox>
           </th>
         </template>
         <template id="row" is="dom-repeat" items="[[fieldsModel]]" as="model">
@@ -34,7 +34,7 @@
         <tr>
           <template is="dom-if" if="[[multiselect]]">
             <td>
-              <paper-checkbox on-change="toggleSelection"></paper-checkbox>
+              <paper-checkbox checked="[[isSelected(row,selected.length)]]" on-change="toggleSelection"></paper-checkbox>
             </td>
           </template>
           <template id="row" is="dom-repeat" items="[[fieldsModel]]" as="model">
@@ -70,13 +70,25 @@
         },
         data: Object
       },
+      isSelected(row, selected) {
+        return !!~this.selected.indexOf(row);
+      },
+      pickAll() {
+        _.forEach(this.data, row => this.$.selector.select(row))
+      },
       getCelldata(model, row) {
         return model.field ? row[model.field] : undefined
       },
       toggleSelection(e) {
         var item = this.$.table.itemForElement(e.target);
-        this.$.selector.select(item);
-        console.log(this.selected);
+        console.log(e.target);
+        console.log(e.target.checked);
+        if (!e.target.checked) {
+          this.$.selector.select(item);
+        } else {
+          // this.$.selector.deselect(item);
+          this.arrayDelete('selected', item);
+        }
       },
       ready() {
         this.counter = 0;
