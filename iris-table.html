@@ -15,13 +15,13 @@
         white-space: nowrap;
       }
     </style>
-    <array-selector id="selector" items="{{data}}" selected="{{selected}}" multi toggle></array-selector>
+
 
     <table id="entity-table">
       <tr>
         <template is="dom-if" if="[[multiselect]]">
           <th>
-            <paper-checkbox id="select-all" on-change="pickAll"></paper-checkbox>
+            <paper-checkbox checked="[[isAllSelected(selected.length)]]" id="select-all" on-change="pickAll"></paper-checkbox>
           </th>
         </template>
         <template id="row" is="dom-repeat" items="[[fieldsModel]]" as="model">
@@ -70,24 +70,29 @@
         },
         data: Object
       },
+      isAllSelected(len) {
+        return this.data.length == len;
+      },
       isSelected(row, selected) {
         return !!~this.selected.indexOf(row);
       },
-      pickAll() {
-        _.forEach(this.data, row => this.$.selector.select(row))
+      pickAll(e) {
+        if (e.target.checked) {
+          _.forEach(this.data, item => !~this.selected.indexOf(item) && this.push('selected', item))
+          return;
+        }
+        this.set('selected', []);
+        this.notifyPath('selected.length', 0);
       },
       getCelldata(model, row) {
         return model.field ? row[model.field] : undefined
       },
       toggleSelection(e) {
         var item = this.$.table.itemForElement(e.target);
-        console.log(e.target);
-        console.log(e.target.checked);
         if (!e.target.checked) {
-          this.$.selector.select(item);
-        } else {
-          // this.$.selector.deselect(item);
           this.arrayDelete('selected', item);
+        } else {
+          this.push('selected', item);
         }
       },
       ready() {
