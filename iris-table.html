@@ -9,10 +9,47 @@
     <style>
       :host {
         display: block;
+        --paper-checkbox-size: 16px;
+      }
+
+      .checkbox {
+        width: 30px;
       }
 
       #entity-table td {
         white-space: nowrap;
+      }
+
+      tr {
+        border-bottom: 1px solid;
+        border-color: var(--mydoc-black-200);
+        color: var(--mydoc-black-800);
+        height: 48px;
+      }
+
+      td,
+      th {
+        padding: 0 12px;
+      }
+
+      tr td {
+        font-size: 13px;
+      }
+
+      tr th {
+        color: var(--mydoc-black-600);
+        height: 56px;
+        font-size: 12px;
+      }
+
+      table {
+        width: 100%;
+        text-align: center;
+        border-collapse: collapse;
+      }
+
+      tbody tr:last-of-type {
+        border-bottom: none;
       }
     </style>
 
@@ -20,7 +57,7 @@
     <table id="entity-table">
       <tr>
         <template is="dom-if" if="[[multiselect]]">
-          <th>
+          <th class="checkbox">
             <paper-checkbox checked="[[isAllSelected(selected.length)]]" id="select-all" on-change="pickAll"></paper-checkbox>
           </th>
         </template>
@@ -33,7 +70,7 @@
       <template id="table" is="dom-repeat" items="[[data]]" as="row">
         <tr>
           <template is="dom-if" if="[[multiselect]]">
-            <td>
+            <td class="checkbox">
               <paper-checkbox checked="[[isSelected(row,selected.length)]]" on-change="toggleSelection"></paper-checkbox>
             </td>
           </template>
