@@ -58,10 +58,10 @@
       <tr>
         <template is="dom-if" if="[[multiselect]]">
           <th class="checkbox">
-            <paper-checkbox checked="[[isAllSelected(selected.length)]]" id="select-all" on-change="pickAll"></paper-checkbox>
+            <paper-checkbox checked="[[isAllSelected(selectedIndex.length,data)]]" id="select-all" on-change="pickAll"></paper-checkbox>
           </th>
         </template>
-        <template id="row" is="dom-repeat" items="[[fieldsModel]]" as="model">
+        <template id="row" is="dom-repeat" items="[[computedModel]]" as="model">
           <th>
             [[model.label]]
           </th>
@@ -71,10 +71,10 @@
         <tr>
           <template is="dom-if" if="[[multiselect]]">
             <td class="checkbox">
-              <paper-checkbox checked="[[isSelected(row,selected.length)]]" on-change="toggleSelection"></paper-checkbox>
+              <paper-checkbox checked="[[isSelected(index,selectedIndex.length)]]" on-change="toggleSelection"></paper-checkbox>
             </td>
           </template>
-          <template id="row" is="dom-repeat" items="[[fieldsModel]]" as="model">
+          <template id="row" is="dom-repeat" items="[[computedModel]]" as="model">
             <td>
               <etable-cell is-editable="[[isEditable]]" data="[[getCelldata(model,row)]]" model="[[field]]"></etable-cell>
             </td>
@@ -93,6 +93,10 @@
         fieldsModel: {
           type: Object
         },
+        computedModel: {
+          type: Array,
+          computed: '_computeFields(fieldsModel)'
+        },
         multiselect: {
           type: Boolean,
           value: false
@@ -103,33 +107,54 @@
         },
         selected: {
           type: Array,
+          value: [],
+          notify: true
+        },
+        selectionField: String,
+        selectedIndex: {
+          type: Array,
+          value: [],
           notify: true
         },
         data: Object
       },
+      _computeFields(fieldsModel) {
+        return _.isArray(fieldsModel) ? fieldsModel : _.map(fieldsModel, (label, field) => ({
+          field,
+          label
+        }));
+      },
       isAllSelected(len) {
         return this.data.length == len;
       },
-      isSelected(row, selected) {
-        return !!~this.selected.indexOf(row);
+      isSelected(index, selected) {
+        return !!~this.selectedIndex.indexOf(index);
       },
       pickAll(e) {
         if (e.target.checked) {
-          _.forEach(this.data, item => !~this.selected.indexOf(item) && this.push('selected', item))
+          let keys = _.keys(this.data);
+          this.set('selectedIndex', _.map(keys, k => parseInt(k)));
+          this.set('selected', this.selectionField ? _.map(this.data, this.selectionField) : this.data)
+
           return;
         }
         this.set('selected', []);
+        this.set('selectedIndex', []);
         this.notifyPath('selected.length', 0);
+        this.notifyPath('selectedIndex.length', 0);
       },
       getCelldata(model, row) {
         return model.field ? row[model.field] : undefined
       },
       toggleSelection(e) {
+        var index = e.model.index;
         var item = this.$.table.itemForElement(e.target);
         if (!e.target.checked) {
-          this.arrayDelete('selected', item);
+          this.arrayDelete('selectedIndex', index);
+          this.arrayDelete('selected', this.selectionField ? this.data[index][this.selectionField] : this.data[index]);
         } else {
-          this.push('selected', item);
+          this.push('selectedIndex', index);
+          this.push('selected', this.selectionField ? this.data[index][this.selectionField] : this.data[index]);
         }
       },
       ready() {
