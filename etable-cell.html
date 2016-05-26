@@ -75,8 +75,11 @@
         },
         _presentationChanged() {
           // let template_name = this.model[this.field.name] ? this.model[this.field.name].template : 'base';
-          let template_name = 'base';
-
+          let template_name = this.model.template || 'base';
+          if (this.clone) {
+            this.clone.value = this.data;
+            return
+          }
           let template = getTemplate(template_name);
           this.templatize(template.display);
           this.clone = this.stamp({

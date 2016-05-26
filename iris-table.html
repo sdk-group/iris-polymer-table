@@ -20,6 +20,10 @@
         white-space: nowrap;
       }
 
+      #entity-table td:first-of-type {
+        @apply(--iris-table-first-cal);
+      }
+
       tr {
         border-bottom: 1px solid;
         border-color: var(--mydoc-black-200);
@@ -67,6 +71,7 @@
           </th>
         </template>
       </tr>
+
       <template id="table" is="dom-repeat" items="[[data]]" as="row">
         <tr>
           <template is="dom-if" if="[[multiselect]]">
@@ -76,7 +81,7 @@
           </template>
           <template id="row" is="dom-repeat" items="[[computedModel]]" as="model">
             <td>
-              <etable-cell is-editable="[[isEditable]]" data="[[getCelldata(model,row)]]" model="[[field]]"></etable-cell>
+              <etable-cell is-editable="[[isEditable]]" data="[[getCelldata(model,row)]]" model="[[model]]"></etable-cell>
             </td>
           </template>
         </tr>
@@ -144,7 +149,15 @@
         this.notifyPath('selectedIndex.length', 0);
       },
       getCelldata(model, row) {
-        return model.field ? row[model.field] : undefined
+        if (_.isArray(model.fields)) return _.pick(row, model.fields);
+        if (_.isObject(model.fields)) return _.reduce(model.fields, (accum, row_key, transform_key) => {
+          //@NOTE: r as key
+          accum[transform_key] = row[row_key]
+          return accum;
+        }, {});
+
+        if (!model.field) return undefined
+        return row[model.field];
       },
       toggleSelection(e) {
         var index = e.model.index;
