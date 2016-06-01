@@ -9,68 +9,96 @@
     <style>
       :host {
         display: block;
+        overflow: auto;
         --paper-checkbox-size: 16px;
       }
-
+      
       .checkbox {
         width: 30px;
       }
-
+      
       #entity-table td {
         white-space: nowrap;
       }
-
+      
       #entity-table td:first-of-type {
         @apply(--iris-table-first-cal);
       }
-
+      
       tr {
         border-bottom: 1px solid;
         border-color: var(--mydoc-black-200);
         color: var(--mydoc-black-800);
         height: 48px;
       }
-
+      
       td,
       th {
         padding: 0 12px;
       }
-
+      
       tr td {
         font-size: 13px;
       }
-
+      
       tr th {
         color: var(--mydoc-black-600);
         height: 56px;
         font-size: 12px;
       }
-
+      
       table {
         width: 100%;
         text-align: center;
         border-collapse: collapse;
       }
-
+      
       tbody tr:last-of-type {
         border-bottom: none;
+      }
+      
+      thead.fixed {
+        background-color: #fafafa;
+      }
+      
+      thead.fixed tr {
+        border-bottom: none;
+      }
+      
+      #border-fix th {
+        height: 1px;
+      }
+      
+      #border-fix {
+        height: 1px;
+        background-color: var(--mydoc-black-200);
       }
     </style>
 
 
     <table id="entity-table">
-      <tr>
-        <template is="dom-if" if="[[multiselect]]">
-          <th class="checkbox">
-            <paper-checkbox checked="[[isAllSelected(selectedIndex.length,data)]]" id="select-all" on-change="pickAll"></paper-checkbox>
-          </th>
+      <thead class$="[[headClass(fixedHeader)]]">
+        <tr>
+          <template is="dom-if" if="[[multiselect]]">
+            <th class="checkbox">
+              <paper-checkbox checked="[[isAllSelected(selectedIndex.length,data)]]" id="select-all" on-change="pickAll"></paper-checkbox>
+            </th>
+          </template>
+          <template id="row" is="dom-repeat" items="[[computedModel]]" as="model">
+            <th>
+              [[model.label]]
+            </th>
+          </template>
+        </tr>
+        <template is="dom-if" if="[[fixedHeader]]">
+          <tr id="border-fix">
+            <template id="row" is="dom-repeat" items="[[computedModel]]" as="model">
+              <th>
+              </th>
+            </template>
+          </tr>
         </template>
-        <template id="row" is="dom-repeat" items="[[computedModel]]" as="model">
-          <th>
-            [[model.label]]
-          </th>
-        </template>
-      </tr>
+      </thead>
 
       <template id="table" is="dom-repeat" items="[[data]]" as="row">
         <tr>
@@ -94,6 +122,9 @@
 
     Polymer({
       is: 'iris-table',
+      listeners: {
+        'scroll': 'onTableScroll'
+      },
       properties: {
         fieldsModel: {
           type: Object
@@ -121,7 +152,19 @@
           value: [],
           notify: true
         },
+        fixedHeader: {
+          type: Boolean,
+          value: false
+        },
         data: Object
+      },
+      onTableScroll() {
+        if (!this.fixedHeader) return;
+        var translate = "translate(0," + this.scrollTop + "px)";
+        this.querySelector("thead").style.transform = translate;
+      },
+      headClass(f) {
+        return f ? 'fixed' : 'free';
       },
       _computeFields(fieldsModel) {
         return _.isArray(fieldsModel) ? fieldsModel : _.map(fieldsModel, (label, field) => ({
