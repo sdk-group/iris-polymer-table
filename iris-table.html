@@ -12,63 +12,63 @@
         overflow: auto;
         --paper-checkbox-size: 16px;
       }
-      
+
       .checkbox {
         width: 30px;
       }
-      
+
       #entity-table td {
         white-space: nowrap;
       }
-      
+
       #entity-table td:first-of-type {
         @apply(--iris-table-first-cal);
       }
-      
+
       tr {
         border-bottom: 1px solid;
         border-color: var(--mydoc-black-200);
         color: var(--mydoc-black-800);
         height: 48px;
       }
-      
+
       td,
       th {
         padding: 0 12px;
       }
-      
+
       tr td {
         font-size: 13px;
       }
-      
+
       tr th {
         color: var(--mydoc-black-600);
         height: 56px;
         font-size: 12px;
       }
-      
+
       table {
         width: 100%;
         text-align: center;
         border-collapse: collapse;
       }
-      
+
       tbody tr:last-of-type {
         border-bottom: none;
       }
-      
+
       thead.fixed {
         background-color: #fafafa;
       }
-      
+
       thead.fixed tr {
         border-bottom: none;
       }
-      
+
       #border-fix th {
         height: 1px;
       }
-      
+
       #border-fix {
         height: 1px;
         background-color: var(--mydoc-black-200);
@@ -90,11 +90,21 @@
             </th>
           </template>
         </tr>
+
+        <template is="dom-if" if="[[hasSummary]]">
+          <tr>
+            <template id="row" is="dom-repeat" items="[[computedModel]]" as="model">
+              <th>
+                <etable-cell is-editable="[[isEditable]]" data="[[getSummary(model,data)]]" model="[[getSummaryModel(model)]]"></etable-cell>
+              </th>
+            </template>
+          </tr>
+        </template>
+
         <template is="dom-if" if="[[fixedHeader]]">
           <tr id="border-fix">
             <template id="row" is="dom-repeat" items="[[computedModel]]" as="model">
-              <th>
-              </th>
+              <th> </th>
             </template>
           </tr>
         </template>
@@ -153,6 +163,10 @@
           notify: true
         },
         fixedHeader: {
+          type: Boolean,
+          value: false
+        },
+        hasSummary: {
           type: Boolean,
           value: false
         },
@@ -215,6 +229,22 @@
       },
       ready() {
         this.counter = 0;
+      },
+      getSummary(model, data) {
+        let reducer = model.reducer;
+
+        if (!_.isFunction(reducer)) return reducer;
+
+        let field = model.field;
+        let initial = model.initial || 0;
+        let cells = _.map(data, (row) => this.getCelldata(model, row));
+
+        return _.reduce(cells, reducer, initial);
+      },
+      getSummaryModel(model) {
+        return {
+          template: model.summary || false
+        }
       }
     });
   </script>
