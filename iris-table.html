@@ -110,7 +110,7 @@
         </template>
       </thead>
 
-      <template id="table" is="dom-repeat" items="[[data]]" as="row">
+      <template id="table" is="dom-repeat" items="[[data]]" as="row" index-as="rowIndex">
         <tr>
           <template is="dom-if" if="[[multiselect]]">
             <td class="checkbox">
@@ -119,7 +119,7 @@
           </template>
           <template id="row" is="dom-repeat" items="[[computedModel]]" as="model">
             <td>
-              <etable-cell is-editable="[[isEditable]]" data="[[getCelldata(model,row)]]" model="[[model]]"></etable-cell>
+              <etable-cell is-editable="[[isEditable]]" data="[[getCelldata(model,row)]]" model="[[model]]" on-tap="cellTap" rowIndex="[[rowIndex]]"></etable-cell>
             </td>
           </template>
         </tr>
@@ -171,6 +171,15 @@
           value: false
         },
         data: Object
+      },
+      cellTap(e){
+        let data = e.model;
+
+        this.fire('cell-tap',{
+          row:data.rowIndex,
+          col:data.index,
+          model: data.model
+        });
       },
       onTableScroll() {
         if (!this.fixedHeader) return;
