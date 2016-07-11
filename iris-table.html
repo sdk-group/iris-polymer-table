@@ -95,7 +95,7 @@
           <tr>
             <template id="row" is="dom-repeat" items="[[computedModel]]" as="model">
               <th>
-                <etable-cell is-editable="[[isEditable]]" data="[[getSummary(model,data)]]" model="[[getSummaryModel(model)]]"></etable-cell>
+                <etable-cell is-editable="[[isEditable]]" data="[[getSummary(model,data)]]" model="[[getSummaryModel(model)]]" on-tap="summaryTap"></etable-cell>
               </th>
             </template>
           </tr>
@@ -172,12 +172,20 @@
         },
         data: Object
       },
-      cellTap(e){
+      cellTap(e) {
         let data = e.model;
 
-        this.fire('cell-tap',{
-          row:data.rowIndex,
-          col:data.index,
+        this.fire('cell-tap', {
+          row: data.rowIndex,
+          col: data.index,
+          model: data.model
+        });
+      },
+      summaryTap(e) {
+        let data = e.model;
+
+        this.fire('summary-tap', {
+          col: data.index,
           model: data.model
         });
       },
@@ -223,7 +231,7 @@
         }, {});
 
         if (!model.field) return undefined
-        return row[model.field];
+        return _.get(row, model.field);
       },
       toggleSelection(e) {
         var index = e.model.index;
@@ -245,10 +253,11 @@
         if (!_.isFunction(reducer)) return reducer;
 
         let field = model.field;
-        let initial = model.initial || 0;
+        let initial = _.clone(model.initial) || 0;
         let cells = _.map(data, (row) => this.getCelldata(model, row));
+        let result = _.reduce(cells, reducer, initial);
 
-        return _.reduce(cells, reducer, initial);
+        return result;
       },
       getSummaryModel(model) {
         return {
