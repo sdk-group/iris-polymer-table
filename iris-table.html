@@ -119,7 +119,7 @@
         <tr>
           <template is="dom-if" if="[[multiselect]]">
             <td class="checkbox">
-              <paper-checkbox checked="[[isSelected(index,selectedIndex.length)]]" on-change="toggleSelection"></paper-checkbox>
+              <paper-checkbox checked="[[isSelected(rowIndex,selectedIndex.length)]]" on-change="toggleSelection"></paper-checkbox>
             </td>
           </template>
           <template id="row" is="dom-repeat" items="[[computedModel]]" as="model">
@@ -239,7 +239,7 @@
         return _.get(row, model.field);
       },
       toggleSelection(e) {
-        var index = e.model.index;
+        var index = e.model.rowIndex;
         var item = this.$.table.itemForElement(e.target);
         if (!e.target.checked) {
           this.arrayDelete('selectedIndex', index);
