@@ -20,7 +20,6 @@
       #entity-table td {
         white-space: nowrap;
       }
-
       #entity-table td:first-of-type {
         @apply(--iris-table-first-cal);
       }
@@ -37,8 +36,8 @@
         padding: 0 12px;
       }
 
-      th etable-cell,
-      td etable-cell {
+      td etable-cell,
+      th etable-cell {
         @apply(--iris-table-cell);
       }
 
@@ -57,7 +56,6 @@
         text-align: center;
         border-collapse: collapse;
       }
-
       tbody tr:last-of-type {
         border-bottom: none;
       }
@@ -78,8 +76,8 @@
         height: 1px;
         background-color: var(--mydoc-black-200);
       }
-    </style>
 
+    </style>
 
     <table id="entity-table">
       <thead class$="[[headClass(fixedHeader)]]">
@@ -109,7 +107,7 @@
         <template is="dom-if" if="[[fixedHeader]]">
           <tr id="border-fix">
             <template id="row" is="dom-repeat" items="[[computedModel]]" as="model">
-              <th> </th>
+              <th></th>
             </template>
           </tr>
         </template>
@@ -195,30 +193,34 @@
         });
       },
       onTableScroll() {
-        if (!this.fixedHeader) return;
+        if (!this.fixedHeader)
+          return;
         var translate = "translate(0," + this.scrollTop + "px)";
         this.querySelector("thead").style.transform = translate;
       },
       headClass(f) {
-        return f ? 'fixed' : 'free';
+        return f
+          ? 'fixed'
+          : 'free';
       },
       _computeFields(fieldsModel) {
-        return _.isArray(fieldsModel) ? fieldsModel : _.map(fieldsModel, (label, field) => ({
-          field,
-          label
-        }));
+        return _.isArray(fieldsModel)
+          ? fieldsModel
+          : _.map(fieldsModel, (label, field) => ({field, label}));
       },
       isAllSelected(len) {
         return this.data.length == len;
       },
       isSelected(index, selected) {
-        return !!~this.selectedIndex.indexOf(index);
+        return ! !~ this.selectedIndex.indexOf(index);
       },
       pickAll(e) {
         if (e.target.checked) {
           let keys = _.keys(this.data);
           this.set('selectedIndex', _.map(keys, k => parseInt(k)));
-          this.set('selected', this.selectionField ? _.map(this.data, this.selectionField) : this.data)
+          this.set('selected', this.selectionField
+            ? _.map(this.data, this.selectionField)
+            : this.data)
 
           return;
         }
@@ -227,26 +229,40 @@
         this.notifyPath('selected.length', 0);
         this.notifyPath('selectedIndex.length', 0);
       },
-      getCelldata(model, row) {
-        if (_.isArray(model.fields)) return _.pick(row, model.fields);
-        if (_.isObject(model.fields)) return _.reduce(model.fields, (accum, row_key, transform_key) => {
-          //@NOTE: r as key
-          accum[transform_key] = row[row_key]
-          return accum;
-        }, {});
+      getRawCellData(model, row) {
+        if (_.isArray(model.fields))
+          return _.pick(row, model.fields);
+        if (_.isObject(model.fields))
+          return _.reduce(model.fields, (accum, row_key, transform_key) => {
+            //@NOTE: r as key
+            accum[transform_key] = row[row_key]
+            return accum;
+          }, {});
 
-        if (!model.field) return undefined
+        if (!model.field)
+          return undefined
         return _.get(row, model.field);
+      },
+      getCelldata(model, row) {
+        let cell = this.getRawCellData(model, row);
+        if (model.transform instanceof Function) {
+          cell = model.transform(cell)
+        }
+        return cell;
       },
       toggleSelection(e) {
         var index = e.model.rowIndex;
-        var item = this.$.table.itemForElement(e.target);
+        // var item = this.$.table.itemForElement(e.target);
         if (!e.target.checked) {
           this.arrayDelete('selectedIndex', index);
-          this.arrayDelete('selected', this.selectionField ? this.data[index][this.selectionField] : this.data[index]);
+          this.arrayDelete('selected', this.selectionField
+            ? this.data[index][this.selectionField]
+            : this.data[index]);
         } else {
           this.push('selectedIndex', index);
-          this.push('selected', this.selectionField ? this.data[index][this.selectionField] : this.data[index]);
+          this.push('selected', this.selectionField
+            ? this.data[index][this.selectionField]
+            : this.data[index]);
         }
       },
       ready() {
@@ -255,7 +271,8 @@
       getSummary(model, data) {
         let reducer = model.reducer;
 
-        if (!_.isFunction(reducer)) return reducer;
+        if (!_.isFunction(reducer))
+          return reducer;
 
         let field = model.field;
         let initial = _.clone(model.initial) || 0;
