@@ -240,7 +240,7 @@
           }, {});
 
         if (!model.field)
-          return undefined
+          return row;
         return _.get(row, model.field);
       },
       getCelldata(model, row) {
