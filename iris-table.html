@@ -41,6 +41,30 @@
         @apply(--iris-table-cell);
       }
 
+      .col-0 etable-cell {
+        @apply(--iris-table-col-0);
+      }
+
+      .col-1 etable-cell {
+        @apply(--iris-table-col-1);
+      }
+
+      .col-2 etable-cell {
+        @apply(--iris-table-col-2);
+      }
+
+      .col-3 etable-cell {
+        @apply(--iris-table-col-3);
+      }
+
+      .col-4 etable-cell {
+        @apply(--iris-table-col-4);
+      }
+
+      .col-5 etable-cell {
+        @apply(--iris-table-col-5);
+      }
+
       tr td {
         font-size: 13px;
       }
@@ -97,7 +121,7 @@
         <template is="dom-if" if="[[hasSummary]]">
           <tr>
             <template id="row" is="dom-repeat" items="[[computedModel]]" as="model">
-              <th>
+              <th class$="col-[[index]]">
                 <etable-cell is-editable="[[isEditable]]" data="[[getSummary(model,data)]]" model="[[getSummaryModel(model)]]" on-tap="summaryTap"></etable-cell>
               </th>
             </template>
@@ -113,7 +137,7 @@
         </template>
       </thead>
 
-      <template id="table" is="dom-repeat" items="[[data]]" as="row" index-as="rowIndex">
+      <template id="table" is="dom-repeat" items="[[data]]" as="row" index-as="rowIndex" filter="[[filter]]">
         <tr>
           <template is="dom-if" if="[[multiselect]]">
             <td class="checkbox">
@@ -121,7 +145,7 @@
             </td>
           </template>
           <template id="row" is="dom-repeat" items="[[computedModel]]" as="model">
-            <td>
+            <td class$="col-[[index]]">
               <etable-cell is-editable="[[isEditable]]" data="[[getCelldata(model,row)]]" model="[[model]]" on-tap="cellTap" rowIndex="[[rowIndex]]"></etable-cell>
             </td>
           </template>
@@ -181,7 +205,8 @@
         this.fire('cell-tap', {
           row: data.rowIndex,
           col: data.index,
-          model: data.model
+          model: data.model,
+          row_data: data.row
         });
       },
       summaryTap(e) {
