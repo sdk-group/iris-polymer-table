@@ -34,6 +34,11 @@
       td,
       th {
         padding: 0 12px;
+        cursor: default;
+      }
+
+      th.sortable {
+        cursor: pointer;
       }
 
       td etable-cell,
@@ -101,6 +106,11 @@
         background-color: var(--mydoc-black-200);
       }
 
+      .header-cell {
+        @apply(--layout-horizontal);
+        @apply(--layout-center-center);
+      }
+
     </style>
 
     <table id="entity-table">
@@ -112,8 +122,13 @@
             </th>
           </template>
           <template id="row" is="dom-repeat" items="[[computedModel]]" as="model">
-            <th>
-              [[model.label]]
+            <th class$="[[computeHeaderClass(model.sortable)]]" on-tap="headerCellTap">
+              <div class="header-cell">
+                <span>[[model.label]]</span>
+                <template is="dom-if" if="[[isSortable(model.sortable)]]">
+                  <iron-icon icon$="[[sortOrder(model.order)]]"></iron-icon>
+                </template>
+              </div>
             </th>
           </template>
         </tr>
@@ -137,7 +152,7 @@
         </template>
       </thead>
 
-      <template id="table" is="dom-repeat" items="[[data]]" as="row" index-as="rowIndex" filter="[[filter]]">
+      <template id="table" is="dom-repeat" items="[[data]]" as="row" index-as="rowIndex" sort="{{sortFunction}}" filter="[[filter]]">
         <tr>
           <template is="dom-if" if="[[multiselect]]">
             <td class="checkbox">
@@ -201,13 +216,74 @@
       },
       cellTap(e) {
         let data = e.model;
+        let real_index = this.data.indexOf(data.row);
 
         this.fire('cell-tap', {
-          row: data.rowIndex,
+          row: real_index,
           col: data.index,
           model: data.model,
           row_data: data.row
         });
+      },
+      isSortable(sortable) {
+        return !!sortable;
+      },
+      sortOrder(order) {
+        if (order == "asc")
+          return "arrow-drop-down";
+
+        if (order == "desc")
+          return "arrow-drop-up";
+
+        return '';
+      },
+      computeHeaderClass(is_sortable) {
+        return is_sortable
+          ? 'sortable'
+          : '';
+      },
+      headerCellTap(e) {
+        let model = e.model.model;
+        let sortable = model.sortable;
+
+        if (!sortable)
+          return;
+        let order = model.order == 'desc'
+          ? 'asc'
+          : 'desc';
+        let model_index = this.computedModel.indexOf(model);
+        for (var i = 0; i < this.computedModel.length; i++) {
+          this.set('computedModel.' + i + '.order', i == model_index
+            ? order
+            : false);
+        }
+        this.sortFunction = model.order == 'asc'
+          ? (x, y) => {
+            let f = this.getCelldata(model, x);
+            let s = this.getCelldata(model, y);
+            if (model.sorter instanceof Function) {
+              return model.sorter(f, s);
+            };
+            if (f == s)
+              return 0;
+            if (f > s)
+              return 1;
+            return -1;
+          }
+          : (x, y) => {
+            let f = this.getCelldata(model, x);
+            let s = this.getCelldata(model, y);
+
+            if (model.sorter instanceof Function) {
+              return -(model.sorter(f, s));
+            };
+
+            if (f == s)
+              return 0;
+            if (f > s)
+              return -1;
+            return 1;
+          };
       },
       summaryTap(e) {
         let data = e.model;
@@ -229,9 +305,23 @@
           : 'free';
       },
       _computeFields(fieldsModel) {
-        return _.isArray(fieldsModel)
+
+        let fm = _.isArray(fieldsModel)
           ? fieldsModel
           : _.map(fieldsModel, (label, field) => ({field, label}));
+
+        this.async(() => {
+          _.forEach(fm, item => {
+            if (!item.sorted)
+              return true;
+            let e = {};
+            _.set(e, 'model.model', item);
+
+            this.headerCellTap(e);
+            return false;
+          })
+        });
+        return fm;
       },
       isAllSelected(len) {
         return this.data.length == len;
@@ -285,6 +375,7 @@
             : this.data[index]);
         } else {
           this.push('selectedIndex', index);
+          console.log(this);
           this.push('selected', this.selectionField
             ? this.data[index][this.selectionField]
             : this.data[index]);
