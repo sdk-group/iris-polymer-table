@@ -118,7 +118,7 @@
         <tr>
           <template is="dom-if" if="[[multiselect]]">
             <th class="checkbox">
-              <paper-checkbox checked="[[isAllSelected(selectedIndex.length,data)]]" id="select-all" on-change="pickAll"></paper-checkbox>
+              <paper-checkbox checked="[[allSelected]]" id="select-all" on-change="pickAll"></paper-checkbox>
             </th>
           </template>
           <template id="row" is="dom-repeat" items="[[computedModel]]" as="model">
@@ -201,7 +201,9 @@
         selectionField: String,
         selectedIndex: {
           type: Array,
-          value: [],
+          value: function () {
+            return [];
+          },
           notify: true
         },
         fixedHeader: {
@@ -243,7 +245,14 @@
           : '';
       },
       headerCellTap(e) {
-        let model = e.model.model;
+        let data = e.model;
+
+        this.fire('header-tap', {
+          col: data.index,
+          model: data.model
+        });
+
+        let model = data.model;
         let sortable = model.sortable;
 
         if (!sortable)
@@ -324,7 +333,7 @@
         return fm;
       },
       isAllSelected(len) {
-        return this.data.length == len;
+        return this.data.length == this.selectedIndex.length;
       },
       isSelected(index, selected) {
         return ! !~ this.selectedIndex.indexOf(index);
@@ -336,11 +345,12 @@
           this.set('selected', this.selectionField
             ? _.map(this.data, this.selectionField)
             : this.data)
-
+          this.allSelected = true;
           return;
         }
         this.set('selected', []);
         this.set('selectedIndex', []);
+        this.allSelected = false;
         this.notifyPath('selected.length', 0);
         this.notifyPath('selectedIndex.length', 0);
       },
@@ -375,11 +385,11 @@
             : this.data[index]);
         } else {
           this.push('selectedIndex', index);
-          console.log(this);
           this.push('selected', this.selectionField
             ? this.data[index][this.selectionField]
             : this.data[index]);
         }
+        this.allSelected = this.data.length == this.selectedIndex.length;
       },
       ready() {
         this.counter = 0;
